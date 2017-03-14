@@ -1,5 +1,5 @@
-T config: (local)
-========
+GIT config: (local)
+=====================
 
 steps:
 
