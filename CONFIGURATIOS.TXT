@@ -1,0 +1,206 @@
+GIT config: (local)
+=====================
+
+steps:
+
+1. Initialize
+	mkdir Proj_drr
+	cd  proj_dir
+
+2. git iniit
+
+3. tree -a  (check the structure with tree command , if not install)
+
+4. ls -l  ~/.gitconfig
+	if avaliable remove it configure again.
+
+	git  config --global user.name "vijay"
+	git config --global user.email "my@mail.com"
+	git config --global color.ui true
+	git config --global  core.editor "/usr/bin/vim"
+
+check 
+	cat /home/lync/.gitconfig
+
+in proj_dir
+	ls -la
+	you should see  .git 
+
+ git status
+	nothing to commit
+
+5. create a file index.html 
+under proj_dir
+	git add  indes.html ( copy items  from working dir to staging
+	git commit  -m "added new file" (  ..... staging to local repo
+
+update the file
+	git status
+	git add index.html
+	git commit -m "updated...."
+
+git log - to check the history in descending order
+
+it shows (sha) value of 40 char  unique no. zoom in
+
+git show <sha1> --> shows the differences / updates etc.
+
+git --oneline  ===shows sha and commits
+git log -n #
+git log --since=yyyy-mm-dd
+git log --unitil=....
+git log since=..... --unitl=...
+git log --author="xyz"
+got log --get="pattern"      got log --get="HEADER"
+
+git conifg
+git add . (all files from the current dir)
+git commit -am "xyz" (addes and commits)
+
+
+
+CHEF SERVER SETUP
+================
+
+
+CHEF WORKSTATION SETUP
+======================
+
+Steps
+
+
+1. chefdk - chef development kit - 
+	install  rpm -ivh chefdk-x.x.x...rpm
+
+2. Project dir - chef-Repo
+	mkdir chefo-repo  ......> this is should be working directory
+	cd chfo-repo
+
+3. Knife configuration dir .chef
+	mkdir .chef
+	cd .chef
+
+4. knife configurtion
+
+i) ..chef-repo/.chef/knife.rb
+ii) https://chef-server/organization/foodfacotry
+iii) lynic
+iv) foodfactory-validator
+v) ..chef-repo/.chef//foodfactory-validator
+vi) cookbooks
+
+4. check config
+	cat knife.rb
+
+5. Download two .pem files from server to here.
+	1) user.pem 
+	2) org-validator.pem
+	use scp or file zila command.
+	scp chef[-server:~lync/source/*.pem
+
+6. check with tree command
+	cd ..
+	tree -a (under chef-repo)
+.chef
+	foodfactory-validator.pem
+	knife.rb
+	lync.pem
+
+7. get certificate
+	knife ssl fectch
+	trusted_certs (this file will be generated)
+
+	knife ssl check ( this show successfully verified)
+
+once all the configuration is compeleted, it will shows below tree 
+
+structure
+
+.Chefo
+  	+-- knife.rb
+	+-- lync.pem
+	+-- swiggy-validator.pem
+	+-- trusted_certs
+	+-- training_c_intrepid-charge-160414_internal.crt
+
+check "	
+
+knife user list --- it show above user
+knife client list ---- it show aabove client
+knire node list  - not yet configured
+
+Node configuration:
+=================
+
+(email , web  server......
+
+steps:
+
+1. setup new server/chef@dmin
+2. user create: chefadmin
+3. make this usersudo
+
+workstation ------> Node
+
+4) fire below command on workstation
+Knife bootstrap -x chefadmin - P chef@dmin--sudo
+
+i  Read the knife.rb
+ii   Transfer .pem files to the node
+iii  Intall the chef-client
+iV Run the Ohai
+V Register the node with server/
+
+5) Change / add all ie. server, workstation and node in hosts file....
+	with ip address and name
+
+
+6) sudo useradd chefadmin
+7) sudo passwd chefadmin -- chef@dmin
+8)sudo  usermod -G wheel chefadmin
+
+9) From workstation ping node and connect to it.
+
+	ping centos7
+	ssh centos7 -l chefadmin
+
+confirm with hostananme and ls -l /root
+
+quit from node  (exit)
+
+10) execute bootstrap command from workstation to node from chef-
+
+repo folder only
+
+knife bootstrap  <node ip> -N <Node name> -x username -P paswword
+
+knife bootstrap 104.197.92.181 -N centos7 -x chefadmin -P chef@dmin 
+
+--sudo
+
+i  Read the knife.rb
+ii Transfer .pem files to the node
+iii  install chef-client
+iv Run the ohai
+v  Register the node with server
+
+check below:
+knife user list --- lync
+knife client list ---- it show aabove client
+knire node list  - centos7
+
+11) login with schef erver ip on web browser
+
+you should see node details
+
+
+
+
+
+
+
+
+
+
+
+
