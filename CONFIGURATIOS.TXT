@@ -1,7 +1,4 @@
-GIT config: (local)
-=====================
-
-steps:
+teps:
 
 1. Initialize
 	mkdir Proj_drr
@@ -61,7 +58,7 @@ git commit -am "xyz" (addes and commits)
 
 CHEF SERVER SETUP
 ================
-
+git 
 
 CHEF WORKSTATION SETUP
 ======================
@@ -112,9 +109,7 @@ vi) cookbooks
 
 	knife ssl check ( this show successfully verified)
 
-once all the configuration is compeleted, it will shows below tree 
-
-structure
+once all the configuration is compeleted, it will shows below tree structure
 
 .Chefo
   	+-- knife.rb
@@ -168,15 +163,12 @@ confirm with hostananme and ls -l /root
 
 quit from node  (exit)
 
-10) execute bootstrap command from workstation to node from chef-
-
-repo folder only
+10) execute bootstrap command from workstation to node from chef-repo folder only
 
 knife bootstrap  <node ip> -N <Node name> -x username -P paswword
 
-knife bootstrap 104.197.92.181 -N centos7 -x chefadmin -P chef@dmin 
+knife bootstrap 104.197.92.181 -N centos7 -x chefadmin -P chef@dmin --sudo
 
---sudo
 
 i  Read the knife.rb
 ii Transfer .pem files to the node
@@ -194,13 +186,309 @@ knire node list  - centos7
 you should see node details
 
 
+============ ========================
+
+create cookbook
+=============
+
+1) Logn to ur workstation
+2) go to proj_dir  chef-repo
+3) creatre ur first cookbook
+	knife cookbook create pancake  --- Previous version
+	chef  generate cookbook -- new version
+
+check:
+[s_vijaya_ramulu@workstation cookbooks]$ tree -a
+.
++-- pancake
+    +-- attributes
+    +-- CHANGELOG.md
+    +-- definitions
+    +-- files
+    ¦   +-- default
+    +-- libraries
+    +-- metadata.rb
+    +-- providers
+    +-- README.md
+    +-- recipes
+    ¦   +-- default.rb
+    +-- resources
+    +-- templates
+        +-- default
+
+4) change the meta data in cookbook/metadata
+comapany name
+email etc.,
+
+sudo vi pancake/metadata.rb 
+
+5) write recipes
+
+sudo vi pancake/recipes/default.rb
+
+file '/tmp/dummy.txt' do
+	content 'this is chef file...'
+	mode 0644
+	owner 'root'
+	group 'root'
+end
+
+6) knife cookbook upload pancake
+
+check:
+knife cookbook list
+
+7) assocaite cookbook with  the node
 
 
+knife node show <node name>
+knife node show centos7
+
+knife node run_list add <nodename> <cookbook>
+knife node run_list add centos7 pancake
+
+8) execute the sudo chef-client command on thenode
+sudo chef-client
+
+check :
+we will able to see the dummy.txt file in tmp file 
 
 
+==================================================
+
+creating 2nd recipe
+
+creating direcotry
+
+1) change the metadata file 0.2.0 version
+	sudo vi cookbooks/pancake/metadata.rb 
+
+2) update the recipe.rb file
+	cd chefo-repo folder
+	vi cookbook/pancake/recipes/default.rb
+
+file '/tmp/dummy.txt' do
+        content 'This files is created by chef..'
+        mode 0644
+        owner 'root'
+        group 'root'
+end
+
+directory '/opt/tomcat' do
+	mode 0755
+	owner 'root'
+	group 'root'
+end
+
+3)	knife cookbook upload pancake
+check
+
+cookbook  0.2.0 
+
+4) run sudo chef-client under node server
+check 
+u able to the new changes..
+
+======================================
+
+create new cookbook (create Appache web server)
+=====================================
+
+Manual setups
+----------------
+yum -y install httpd
+enable service httpd
+start the service
+
+add index.html file
+
+1) knife cookbook create  <cookname>
+	knife cookbook create  <cookname>web-server
+
+2) Add recipe
+sudo vi cookbooks/web-server/recipes/default.rb
+
+package 'httpd'
+
+service 'httpd' do
+	action [:enable, :start]
+end
+
+file '/var/www/html/index.html' do
+	content 'welcome to the chef Automation'
+	mode 0644
+	owner 'root'
+	group 'root'
+end
+
+we can have one excution command also but not recommanded...
+execute 'sudo chown apache:apache /var/www/html/index.html'
+
+3) upload the recipe to the server
+	sudo knife cookbook upload web-server
+
+4) assocation this cookbook to node
+
+knife node run_list add <nodename> <cookbook>
+knife node run_list add centos7 pancake
+
+or
+
+knife node edit <nodename>
+knife node edit centos7
+
+if prompted for enviroment varialbe the
+	export EDITOR=`which vim` 	(' NOT THIS, ` THIS ONE)
+CHECK
+	echo $EDITOR
+	knife node edit centos7 (new recipe should reflect)
+	rpm -qa | http (check the package exists on node or not)
+	ps -ef | grep http (check the serice is running or not)
+
+4) run sudo chef-client under node server
+check 
+
+	elinks :http:localhost
+u able to the new changes..
+
+====================================
+
+CRON setup
+--------------
+
+to check the cron jobs
+
+	sudo crontab -l  ( e for eidit, r remove)
+
+ # min 	hour 	dom 	mon 	dow
+# 0-59 	1-24 	1-31 	1-12 	0-7=sunday
+for every 15 min
+
+0,15,30,45 * * * *  /usr/bin/chef-client
+or
+*/15 * * * *  /usr/bin/chef-client
+
+download from supermarket
+
+	knife supermarket download  cron 4.0.0
+	sudo tar xvfz cron-4.0.0.tar.gz -C cookbooks/
+
+recipe:
+
+1)
+service 'cron' do
+	service_name node['cron']['service_name']
+	action [:enable, :start]
+end
+
+cron 'chef-client-run' do
+	minute '*/15'
+	command '/usr/bin/chef-client'
+end
+
+2) edit the node with cookbook
+	kinfe node edit centos7
 
 
+3) knife node show centos7
 
 
+============================================
 
 
+Installing tomoat server on centos7 (Manually)
+-----------------------------------------------------------
+
+https://www.vultr.com/docs/how-to-install-apache-tomcat-8-on-centos-7
+
+steps:
+
+1. Step 1: Update your CentOS system
+	sudo yum install epel-release
+	sudo yum update -y && sudo reboot
+
+2.Install Java
+	sudo yum install java-1.8.0-openjdk.x86_64
+
+check:
+	java -version
+	openjdk version "1.8.0_91"
+	OpenJDK Runtime Environment (build 1.8.0_91-b14)
+	OpenJDK 64-Bit Server VM (build 25.91-b14, mixed mode)
+
+3: Create a dedicated user for Apache Tomcat
+
+	sudo groupadd tomcat
+	sudo mkdir /opt/tomcat
+	sudo useradd -s /bin/nologin -g tomcat -d /opt/tomcat tomcat
+
+ 4: Download and install the latest Apache Tomcat
+	cd ~
+	wget http://www-us.apache.org/dist/tomcat/tomcat-8/v8.0.33/bin/apache-tomcat-8.0.33.tar.gz
+	sudo tar -zxvf apache-tomcat-8.0.33.tar.gz -C /opt/tomcat --strip-components=1
+
+latest:
+http://mirror.fibergrid.in/apache/tomcat/tomcat-8/v8.5.12/bin/apache-tomcat-8.5.12.tar.gz
+sudo tar -zxvf apache-tomcat-8.5.12.tar.gz -C /opt/tomcat --strip-components=1
+
+5: Setup proper permissions
+
+	cd /opt/tomcat
+	sudo chgrp -R tomcat conf
+	sudo chmod g+rwx conf
+	sudo chmod g+r conf/*
+	sudo chown -R tomcat logs/ temp/ webapps/ work/
+
+	sudo chgrp -R tomcat bin
+	sudo chmod g+rwx bin
+	sudo chmod g+r bin/*
+
+Setup a Systemd unit file for Apache Tomcat
+
+	sudo vi /etc/systemd/system/tomcat.service
+
+		[Unit]
+Description=Apache Tomcat Web Application Container
+After=syslog.target network.target
+
+[Service]
+Type=forking
+
+Environment=JAVA_HOME=/usr/lib/jvm/jre
+Environment=CATALINA_PID=/opt/tomcat/temp/tomcat.pid
+Environment=CATALINA_HOME=/opt/tomcat
+Environment=CATALINA_BASE=/opt/tomcat
+Environment='CATALINA_OPTS=-Xms512M -Xmx1024M -server -XX:+UseParallelGC'
+Environment='JAVA_OPTS=-Djava.awt.headless=true -Djava.security.egd=file:/dev/./urandom'
+
+ExecStart=/opt/tomcat/bin/startup.sh
+ExecStop=/bin/kill -15 $MAINPID
+
+User=tomcat
+Group=tomcat
+
+[Install]
+WantedBy=multi-user.target
+
+:wq!
+
+
+7: Install haveged, a security-related program
+
+	sudo yum install haveged
+	sudo systemctl start haveged.service
+	sudo systemctl enable haveged.service
+
+8: Start and test Apache Tomcat
+	sudo systemctl start tomcat.service
+	sudo systemctl enable tomcat.service
+
+
+	sudo firewall-cmd --zone=public --permanent --add-port=8080/tcp
+	sudo firewall-cmd --reload
+
+check:
+	http://[your-Vultr-server-IP]:8080
+
+
+==============================================
