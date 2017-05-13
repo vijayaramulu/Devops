@@ -1,0 +1,14 @@
+GoodMorning()
+{
+  echo "Welcome to Lync"
+  echo "Good Morning, today's date is "
+  date
+}
+
+BackupNow()
+{
+  echo "Starting backup of /etc folder"
+  sleep 10
+  echo "Backup ended"
+}
+
