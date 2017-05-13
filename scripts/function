@@ -1,0 +1,15 @@
+
+goodmorning()
+{
+echo "Good Morning"
+echo "Today's date is : " 
+date
+}
+
+
+takebackup()
+{
+echo "Started taking backup of project folder"
+sleep 5
+echo "Backup completed"
+}
